@@ -1,7 +1,7 @@
 async function main() {
     const Factory = await ethers.getContractFactory("Stake");
     console.log("Deploying Proxy Contract. Hold Tight..");
-    const factoryProxy = await upgrades.deployProxy(Factory, ["0x2bA49Aaa16E6afD2a993473cfB70Fa8559B523cF", "0x783b5aF21Fd4e99cF98ebE469A2F63dcfdE6C738", "0x783b5aF21Fd4e99cF98ebE469A2F63dcfdE6C738", "86400"], {kind: 'uups'})
+    const factoryProxy = await upgrades.deployProxy(Factory, ["0x2bA49Aaa16E6afD2a993473cfB70Fa8559B523cF", "0x1fBF4E64007c13e1d61391195F8D3f32A648e583", "0x1fBF4E64007c13e1d61391195F8D3f32A648e583", "31560000"], {kind: 'uups'})
     console.log("proxy address: ", factoryProxy.address);
   }
   
