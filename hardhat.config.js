@@ -41,7 +41,9 @@ module.exports = {
       enabled: true,
       runs: 200
     }
-  }
+  },mocha: {
+    timeout: 4200000,
+  },
 },
 etherscan: {
   // Your API key for Etherscan
