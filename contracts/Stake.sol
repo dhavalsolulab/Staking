@@ -556,11 +556,11 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
 
         uint256 _rate;
 
-        if(block.timestamp >= userData[_holder].stakingTime.add(30 days)){
+        if(block.timestamp <= userData[_holder].stakingTime.add(30 days)){
             _rate = rewardRates[0];
-        }else if(block.timestamp >= userData[_holder].stakingTime.add(180 days)){
+        }else if(block.timestamp > userData[_holder].stakingTime.add(30 days) && block.timestamp <= userData[_holder].stakingTime.add(180 days)){
             _rate = rewardRates[1];
-        }else if(block.timestamp >= userData[_holder].stakingTime.add(365 days)){
+        }else{
             _rate = rewardRates[2];
         }
 
