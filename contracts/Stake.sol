@@ -397,49 +397,6 @@ library EnumerableSet {
     }
 }
 
-abstract contract Context {
-    function _msgSender() internal view virtual returns (address payable) {
-        return payable(msg.sender);
-    }
-
-    function _msgData() internal view virtual returns (bytes memory) {
-        this; 
-        return msg.data;
-    }
-}
-
-abstract contract Ownable is Context {
-    address private _owner;
-
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
-    constructor () {
-        address msgSender = _msgSender();
-        _owner = msgSender;
-        emit OwnershipTransferred(address(0), msgSender);
-    }
-
-    function owner() public view virtual returns (address) {
-        return _owner;
-    }
-
-    modifier onlyOwner() {
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        _;
-    }
-
-    function renounceOwnership() public virtual onlyOwner {
-        emit OwnershipTransferred(_owner, address(0));
-        _owner = address(0);
-    }
-
-    function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
-    }
-}
-
 interface AggregatorInterface {
   function latestAnswer() external view returns (int256);
   function latestTimestamp() external view returns (uint256);
@@ -458,10 +415,10 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
     event RewardsTransferred(address holder, uint256 amount);
 
     struct UserData{
-        uint depositedTokens;
-        uint stakingTime;
-        uint lastClaimedTime;
-        uint totalEarnedTokens;
+        uint depositedTokens; //Number of tokens deposited by user
+        uint stakingTime; // Unix timestamp when user deposited tokens
+        uint lastClaimedTime; // Last timestamp when user claim tokens
+        uint totalEarnedTokens; // Total tokens earned by user
     }
 
     AggregatorInterface public dataFeedAddress;
@@ -472,16 +429,22 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
     // reward token contract address
     address public rewardToken;
 
+    // reward interval till APY earn
     uint256 public rewardInterval;
 
+    // total claimed rewards claimed from contract
     uint256 public totalClaimedRewards;
 
+    // total staked tokens in contract
     uint256 public totalStaked;
 
+    // array of stakers
     EnumerableSet.AddressSet private holders;
 
+    // array of reward rates
     uint256[] public rewardRates;
 
+    // Get user details
     mapping(address => UserData) public userData;
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
@@ -496,12 +459,11 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
         totalClaimedRewards = 0;
     }
 
-    function setRewardInterval(uint256 _rewardInterval) public onlyOwner{
-        rewardInterval = _rewardInterval;
-    }
-
+    /**
+     * @dev Update user account details
+     */
     function updateAccount(address account) private {
-        uint256 pendingDivs = getPendingDivs(account);
+        uint256 pendingDivs = getPendingAmount(account);
         if (pendingDivs > 0) {
             
             require(
@@ -517,6 +479,9 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
         userData[account].lastClaimedTime = block.timestamp;
     }
 
+    /**
+     * @dev Deposit tokens to the contract
+     */
     function deposit(uint256 amountToStake) public {
 
         require(amountToStake > 0, "Cannot deposit 0 Tokens");
@@ -544,6 +509,9 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
         }
     }
 
+    /**
+     * @dev Withdraw tokens from the contract
+     */
     function withdraw(uint256 amountToWithdraw) public {
         require(
             userData[msg.sender].depositedTokens >= amountToWithdraw,
@@ -568,17 +536,23 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
         }
     }
 
+    /**
+     * @dev Claim tokens from the contract
+     */
     function claimDivs() public {
         updateAccount(msg.sender);
     }
-        
-    function getPendingDivs(address _holder) public view returns (uint256) {
+
+    /**
+     * @dev Get pending claimable amount till current time
+     */   
+    function getPendingAmount(address _holder) public view returns (uint256) {
         if (!holders.contains(_holder)) return 0;
         if (userData[_holder].depositedTokens == 0) return 0;
         
         uint256 timeDiff = block.timestamp.sub(userData[_holder].lastClaimedTime);
         uint256 stakedAmount = userData[_holder].depositedTokens;
-        uint256 stakedAmountInUSD = stakedAmount.mul(dataFeedAddress.latestAnswer());
+        uint256 stakedAmountInUSD = stakedAmount.mul(uint256(dataFeedAddress.latestAnswer())).div(1e8);
 
         uint256 _rate;
 
@@ -590,7 +564,7 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
             _rate = rewardRates[2];
         }
 
-        if(stakedAmountInUSD) > 100 ether){
+        if((stakedAmountInUSD) > 100 ether){
             _rate = _rate.add(200);
         }else if(stakedAmountInUSD > 500 ether){
             _rate = _rate.add(500);
@@ -607,10 +581,16 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
         return pendingDivs;
     }
 
+    /**
+     * @dev Get number of stakers in contract
+     */
     function getNumberOfHolders() public view returns (uint256) {
         return holders.length();
     }
 
+    /**
+     * @dev Get stakers list in contract
+     */
     function getStakersList(uint256 startIndex, uint256 endIndex)
         public
         view
@@ -644,18 +624,5 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
             _lastClaimedTimeStamps,
             _stakedTokens
         );
-    }
-
-    // function to allow admin to claim *other* ERC20 tokens sent to this contract (by mistake)
-    function transferAnyERC20Tokens(
-        address _tokenAddr,
-        address _to,
-        uint256 _amount
-    ) public onlyOwner {
-        require(
-            _tokenAddr != depositToken,
-            "Cannot Transfer Out Deposit Token!"
-        );
-        IERC20Upgradeable(_tokenAddr).transfer(_to, _amount);
     }
 }

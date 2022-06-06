@@ -1,5 +1,3 @@
-let NFTTokenAddress;
-
 async function main() {
     const Factory = await ethers.getContractFactory("Stake");
     console.log("Deploying Proxy Contract. Hold Tight..");
