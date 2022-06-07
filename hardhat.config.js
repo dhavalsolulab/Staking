@@ -24,8 +24,8 @@ module.exports = {
   defaultNetwork: 'hardhat',
   networks: {
     'rinkeby': {
-      url: 'https://rinkeby.infura.io/v3/6cbc509e3fd7443e94a3e94d5c260b38',
-      accounts: ['4d93e17a7d53f6f65db0485cf805a9b5a8cdb80fce80b3ce86546249228e2789']
+      url: '',
+      accounts: ['']
     }
   },
   solidity: {
@@ -48,6 +48,6 @@ module.exports = {
 etherscan: {
   // Your API key for Etherscan
   // Obtain one at https://etherscan.io/
-  apiKey: "N6P8JPQE2DNBYCX9WX2E3TUFVUKJURGWZ3"
+  apiKey: ""
 }
 };
