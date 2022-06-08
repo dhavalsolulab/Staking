@@ -412,15 +412,6 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
     using SafeMath for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    event RewardsTransferred(address holder, uint256 amount);
-
-    struct UserData{
-        uint depositedTokens; //Number of tokens deposited by user
-        uint stakingTime; // Unix timestamp when user deposited tokens
-        uint lastClaimedTime; // Last timestamp when user claim tokens
-        uint totalEarnedTokens; // Total tokens earned by user
-    }
-
     AggregatorInterface public dataFeedAddress;
 
     // deposit token contract address
@@ -444,6 +435,15 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
     // array of reward rates
     uint256[] public rewardRates;
 
+    event RewardsTransferred(address holder, uint256 amount);
+
+    struct UserData{
+        uint depositedTokens; //Number of tokens deposited by user
+        uint stakingTime; // Unix timestamp when user deposited tokens
+        uint lastClaimedTime; // Last timestamp when user claim tokens
+        uint totalEarnedTokens; // Total tokens earned by user
+    }
+
     // Get user details
     mapping(address => UserData) public userData;
 
@@ -456,109 +456,25 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
         rewardToken = _rewardToken;
         rewardInterval = _rewardInterval;
         rewardRates = [500, 1000, 1500];
-        totalClaimedRewards = 0;
     }
-
-    /**
-     * @dev Update user account details
-     */
-    function updateAccount(address account) private {
-        uint256 pendingDivs = getPendingAmount(account);
-        if (pendingDivs > 0) {
-            
-            require(
-                IERC20Upgradeable(rewardToken).transfer(account, pendingDivs),
-                "Could not transfer tokens."
-            );
-            userData[account].totalEarnedTokens = userData[account].totalEarnedTokens.add(
-                pendingDivs
-            );
-            totalClaimedRewards = totalClaimedRewards.add(pendingDivs); 
-            emit RewardsTransferred(account, pendingDivs); 
-        }
-        userData[account].lastClaimedTime = block.timestamp;
-    }
-
-    /**
-     * @dev Deposit tokens to the contract
-     */
-    function deposit(uint256 amountToStake) public {
-
-        require(amountToStake > 0, "Cannot deposit 0 Tokens");
-        
-        require(
-            IERC20Upgradeable(depositToken).transferFrom(
-                msg.sender,
-                address(this),
-                amountToStake
-            ),
-            "Insufficient Token Allowance"
-        );
-
-        updateAccount(msg.sender);
-
-        userData[msg.sender].depositedTokens = userData[msg.sender].depositedTokens.add(
-            amountToStake
-        );
-
-        totalStaked = totalStaked.add(amountToStake);
-
-        if (!holders.contains(msg.sender)) {
-            holders.add(msg.sender);
-            userData[msg.sender].stakingTime = block.timestamp;
-        }
-    }
-
-    /**
-     * @dev Withdraw tokens from the contract
-     */
-    function withdraw(uint256 amountToWithdraw) public {
-        require(
-            userData[msg.sender].depositedTokens >= amountToWithdraw,
-            "Invalid amount to withdraw"
-        );
-
-        updateAccount(msg.sender);
-
-        require(
-            IERC20Upgradeable(depositToken).transfer(msg.sender, amountToWithdraw),
-            "Could not transfer tokens."
-        );
-
-        userData[msg.sender].depositedTokens = userData[msg.sender].depositedTokens.sub(
-            amountToWithdraw
-        );
-
-        totalStaked = totalStaked.sub(amountToWithdraw);
-
-        if (holders.contains(msg.sender) && userData[msg.sender].depositedTokens == 0) {
-            holders.remove(msg.sender);
-        }
-    }
-
-    /**
-     * @dev Claim tokens from the contract
-     */
-    function claimDivs() public {
-        updateAccount(msg.sender);
-    }
-
+    
     /**
      * @dev Get pending claimable amount till current time
      */   
     function getPendingAmount(address _holder) public view returns (uint256) {
-        if (!holders.contains(_holder)) return 0;
-        if (userData[_holder].depositedTokens == 0) return 0;
+        UserData memory _userData = userData[_holder];
+        require(holders.contains(_holder), "Not a valid user");
+        require(_userData.depositedTokens != 0, "Staking amount is 0");
         
-        uint256 timeDiff = block.timestamp.sub(userData[_holder].lastClaimedTime);
-        uint256 stakedAmount = userData[_holder].depositedTokens;
+        uint256 timeDiff = block.timestamp - _userData.lastClaimedTime;
+        uint256 stakedAmount = _userData.depositedTokens;
         uint256 stakedAmountInUSD = stakedAmount.mul(uint256(dataFeedAddress.latestAnswer())).div(1e8);
 
         uint256 _rate;
 
-        if(block.timestamp <= userData[_holder].stakingTime.add(30 days)){
+        if(block.timestamp <= _userData.stakingTime.add(30 days)){
             _rate = rewardRates[0];
-        }else if(block.timestamp > userData[_holder].stakingTime.add(30 days) && block.timestamp <= userData[_holder].stakingTime.add(180 days)){
+        }else if(block.timestamp > _userData.stakingTime.add(30 days) && block.timestamp <= _userData.stakingTime.add(180 days)){
             _rate = rewardRates[1];
         }else{
             _rate = rewardRates[2];
@@ -582,19 +498,68 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
     }
 
     /**
+     * @dev Deposit tokens to the contract
+     */
+    function deposit(uint256 amountToStake) external {
+        UserData memory _userData = userData[msg.sender];
+        require(amountToStake > 0, "Cannot deposit 0 Tokens");
+
+        _updateAccount(msg.sender);
+
+        _userData.depositedTokens = _userData.depositedTokens.add(amountToStake);
+
+        totalStaked = totalStaked.add(amountToStake);
+
+        if (!holders.contains(msg.sender)) {
+            holders.add(msg.sender);
+            _userData.stakingTime = block.timestamp;
+        }
+
+        require(IERC20Upgradeable(depositToken).transferFrom(msg.sender, address(this), amountToStake), "Insufficient Token Allowance");
+    }
+
+    /**
+     * @dev Withdraw tokens from the contract
+     */
+    function withdraw(uint256 amountToWithdraw) external {
+        UserData memory _userData = userData[msg.sender];
+        require(
+            userData[msg.sender].depositedTokens >= amountToWithdraw,
+            "Invalid amount to withdraw"
+        );
+
+        _updateAccount(msg.sender);
+
+        _userData.depositedTokens = _userData.depositedTokens.sub(
+            amountToWithdraw
+        );
+
+        totalStaked = totalStaked.sub(amountToWithdraw);
+
+        if (holders.contains(msg.sender) && _userData.depositedTokens == 0) {
+            holders.remove(msg.sender);
+        }
+        require(IERC20Upgradeable(depositToken).transfer(msg.sender, amountToWithdraw),"Could not transfer tokens.");
+    }
+
+    /**
+     * @dev Claim tokens from the contract
+     */
+    function claimDivs() external {
+        _updateAccount(msg.sender);
+    }
+
+    /**
      * @dev Get number of stakers in contract
      */
-    function getNumberOfHolders() public view returns (uint256) {
+    function getNumberOfHolders() external view returns (uint256) {
         return holders.length();
     }
 
     /**
      * @dev Get stakers list in contract
      */
-    function getStakersList(uint256 startIndex, uint256 endIndex)
-        public
-        view
-        returns (
+    function getStakersList(uint256 startIndex, uint256 endIndex) external view returns (
             address[] memory stakers,
             uint256[] memory stakingTimestamps,
             uint256[] memory lastClaimedTimeStamps,
@@ -624,5 +589,26 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
             _lastClaimedTimeStamps,
             _stakedTokens
         );
+    }
+ 
+    /**
+     * @dev Update user account details
+     */
+    function _updateAccount(address account) private {
+        UserData memory _userData = userData[account];
+        uint256 pendingDivs = getPendingAmount(account);
+        if (pendingDivs > 0) {
+            
+            require(
+                IERC20Upgradeable(rewardToken).transfer(account, pendingDivs),
+                "Could not transfer tokens."
+            );
+            _userData.totalEarnedTokens = _userData.totalEarnedTokens.add(
+                pendingDivs
+            );
+            totalClaimedRewards = totalClaimedRewards.add(pendingDivs); 
+            emit RewardsTransferred(account, pendingDivs); 
+        }
+        _userData.lastClaimedTime = block.timestamp;
     }
 }
