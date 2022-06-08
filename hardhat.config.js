@@ -2,6 +2,7 @@ require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-ethers");
 require("@openzeppelin/hardhat-upgrades");
 require("@nomiclabs/hardhat-etherscan");
+require('dotenv').config({path:__dirname+'/.env'})
 
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -24,8 +25,8 @@ module.exports = {
   defaultNetwork: 'hardhat',
   networks: {
     'rinkeby': {
-      url: '',
-      accounts: ['']
+      url: process.env.RPC_URL,
+      accounts: [process.env.ACC_PRIVATE_KEY]
     }
   },
   solidity: {
@@ -48,6 +49,6 @@ module.exports = {
 etherscan: {
   // Your API key for Etherscan
   // Obtain one at https://etherscan.io/
-  apiKey: ""
+  apiKey: process.env.API_KEY
 }
 };
