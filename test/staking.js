@@ -58,40 +58,94 @@ describe("Staking contract deploy", async function () {
         })
     })
 
-    describe("Claim token", async () => {
+    describe("Claim token after 5 minutes in progress...", async () => {
         before("Claim tokens after 5 minutes", async () => {
             function timeOut(ms) {
                 return new Promise((res) => {
                     setTimeout(res, ms);
                 });
             }
-            await timeOut(300000).then(async () => {
+            await timeOut(30000).then(async () => {
                 const claimTx = await factoryProxy.claimDivs();
+                await claimTx.wait();
             })
         })
         it("Claimed amount should be 0.00319634703", async () => {
             const userData = await factoryProxy.userData(owner.address);
+            console.log('%c 🍣 userData: ', 'font-size:20px;background-color: #B03734;color:#fff;', ethers.utils.formatEther(userData[3]) );
 
-            expect(userData[3]).to.equal("3196347030000000");
+            console.log('%c 🍊 parseFloat(0.00319634703): ', 'font-size:20px;background-color: #93C0A4;color:#fff;', parseFloat(0.00319634703));
+            expect(ethers.utils.formatEther(userData[3])).to.be.above(parseFloat(0.00046945205479452));
         })
     })
 
-    // describe("Claim test", async () => {
-    //     before("Claim after 100 seconds", async () => {
-    //         function timeOut(ms) {
-    //             return new Promise((res) => {
-    //               setTimeout(res, ms);
-    //             });
-    //         }
-    //         timeOut(100000).then(async () => {
-    //             const claimTx = await factoryProxy.claimDivs();
-    //         })
-    //     })
-    
-    //     it("Should claim tokens from the contract", async function() {
-    //         const userData = await factoryProxy.userData();
-    
-    //         expect(userData[3]).to.equal("1000000000000000000");
-    //     });
-    // })
-  });
+    describe("Claim token after 30 minutes in progress...", async () => {
+        before("Claim tokens after 30 minutes", async () => {
+            function timeOut(ms) {
+                return new Promise((res) => {
+                    setTimeout(res, ms);
+                });
+            }
+            await timeOut(1800000).then(async () => {
+                const claimTx = await factoryProxy.claimDivs();
+                await claimTx.wait();
+            })
+        })
+        it("Claimed amount should be 0.00319634703", async () => {
+            const userData = await factoryProxy.userData(owner.address);
+            console.log('%c 🍣 userData: ', 'font-size:20px;background-color: #B03734;color:#fff;', ethers.utils.formatEther(userData[3]) );
+
+            console.log('%c 🍊 parseFloat(0.00319634703): ', 'font-size:20px;background-color: #93C0A4;color:#fff;', parseFloat(0.00319634703));
+            expect(ethers.utils.formatEther(userData[3])).to.be.above(parseFloat(0.00046945205479452));
+        })
+    })
+
+    describe("Deposit tokens", async () => {
+        before("Deposit 300 tokens", async () => {
+
+            const depositTx = await factoryProxy.deposit("300000000000000000000");
+            await depositTx.wait();
+        })
+        it("User's allowance should be 99500", async () => {
+            const allowance = await daiToken.allowance(owner.address, factoryProxy.address);
+
+            expect(allowance).to.equal("99500000000000000000000");
+        })
+        it("User's deposited tokens should be 500", async () => {
+            const userData = await factoryProxy.userData(owner.address);
+
+            expect(userData[0]).to.equal("500000000000000000000");
+        })
+        it("Total staked tokens should be 500", async () => {
+            const totalStaked = await factoryProxy.totalStaked();
+
+            expect(totalStaked).to.equal("500000000000000000000");
+        })
+        it("Number of holders should be 1", async () => {
+            const holders = await factoryProxy.getNumberOfHolders();
+
+            expect(holders).to.equal("1");
+        })
+    })
+
+    describe("Claim token after 30 minutes in progress...", async () => {
+        before("Claim tokens after 30 minutes", async () => {
+            function timeOut(ms) {
+                return new Promise((res) => {
+                    setTimeout(res, ms);
+                });
+            }
+            await timeOut(1800000).then(async () => {
+                const claimTx = await factoryProxy.claimDivs();
+                await claimTx.wait();
+            })
+        })
+        it("Claimed amount should be 0.00319634703", async () => {
+            const userData = await factoryProxy.userData(owner.address);
+            console.log('%c 🍣 userData: ', 'font-size:20px;background-color: #B03734;color:#fff;', ethers.utils.formatEther(userData[3]) );
+
+            console.log('%c 🍊 parseFloat(0.00319634703): ', 'font-size:20px;background-color: #93C0A4;color:#fff;', parseFloat(0.00319634703));
+            expect(ethers.utils.formatEther(userData[3])).to.be.above(parseFloat(0.00046945205479452));
+        })
+    })
+});

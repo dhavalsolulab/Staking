@@ -27,7 +27,7 @@ module.exports = {
     'rinkeby': {
       url: process.env.RPC_URL,
       accounts: [process.env.ACC_PRIVATE_KEY],
-      timeout: 1500000
+      timeout: 15000000
     }
   },
   solidity: {
@@ -43,9 +43,10 @@ module.exports = {
       enabled: true,
       runs: 200
     }
-  },mocha: {
-    timeout: 210000,
   },
+},
+mocha: {
+  timeout: 21000000,
 },
 etherscan: {
   // Your API key for Etherscan

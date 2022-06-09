@@ -778,7 +778,7 @@ contract Stake is
                 IERC20Upgradeable(rewardToken).transfer(account, pendingDivs),
                 "Could not transfer tokens."
             );
-            _userData.totalEarnedTokens = _userData.totalEarnedTokens.add(
+            userData[account].totalEarnedTokens = userData[account].totalEarnedTokens.add(
                 pendingDivs
             );
             totalClaimedRewards = totalClaimedRewards.add(pendingDivs);
