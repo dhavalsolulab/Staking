@@ -611,6 +611,8 @@ contract Stake is
 
     /**
      * @dev Get pending claimable amount till current time
+     * @param _holder : User address to check user's pending balance
+     * @return Claimable amount
      */
     function getPendingAmount(address _holder) public view returns (uint256) {
         UserData memory _userData = userData[_holder];
@@ -656,6 +658,7 @@ contract Stake is
 
     /**
      * @dev Deposit tokens to the contract
+     * @param amountToStake : amount to deposit in contract in ether format
      */
     function deposit(uint256 amountToStake) external {
         // UserData memory _userData = userData[msg.sender];
@@ -686,6 +689,7 @@ contract Stake is
 
     /**
      * @dev Withdraw tokens from the contract
+     * @param amountToWithdraw : amount to withdraw from contract in ether format
      */
     function withdraw(uint256 amountToWithdraw) external {
         UserData memory _userData = userData[msg.sender];
@@ -723,6 +727,7 @@ contract Stake is
 
     /**
      * @dev Get number of stakers in contract
+     * @return number of stakers staked their token in staking contract
      */
     function getNumberOfHolders() external view returns (uint256) {
         return holders.length();
@@ -730,6 +735,9 @@ contract Stake is
 
     /**
      * @dev Get stakers list in contract
+     * @param startIndex : from index 
+     * @param endIndex : to index
+     * @return stakers address, staking timestamps, last claimed timestamps, number of staked tokens 
      */
     function getStakersList(uint256 startIndex, uint256 endIndex)
         external
@@ -769,6 +777,7 @@ contract Stake is
 
     /**
      * @dev Update user account details
+     * @param account : User address
      */
     function _updateAccount(address account) private {
         UserData memory _userData = userData[account];
