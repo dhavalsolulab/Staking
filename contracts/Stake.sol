@@ -8,69 +8,130 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 library Address {
-
     function isContract(address account) internal view returns (bool) {
-
         uint256 size;
-        assembly { size := extcodesize(account) }
+        assembly {
+            size := extcodesize(account)
+        }
         return size > 0;
     }
 
     function sendValue(address payable recipient, uint256 amount) internal {
-        require(address(this).balance >= amount, "Address: insufficient balance");
+        require(
+            address(this).balance >= amount,
+            "Address: insufficient balance"
+        );
 
-        (bool success, ) = recipient.call{ value: amount }("");
-        require(success, "Address: unable to send value, recipient may have reverted");
+        (bool success, ) = recipient.call{value: amount}("");
+        require(
+            success,
+            "Address: unable to send value, recipient may have reverted"
+        );
     }
 
-    function functionCall(address target, bytes memory data) internal returns (bytes memory) {
-      return functionCall(target, data, "Address: low-level call failed");
+    function functionCall(address target, bytes memory data)
+        internal
+        returns (bytes memory)
+    {
+        return functionCall(target, data, "Address: low-level call failed");
     }
 
-    function functionCall(address target, bytes memory data, string memory errorMessage) internal returns (bytes memory) {
+    function functionCall(
+        address target,
+        bytes memory data,
+        string memory errorMessage
+    ) internal returns (bytes memory) {
         return functionCallWithValue(target, data, 0, errorMessage);
     }
 
-    function functionCallWithValue(address target, bytes memory data, uint256 value) internal returns (bytes memory) {
-        return functionCallWithValue(target, data, value, "Address: low-level call with value failed");
+    function functionCallWithValue(
+        address target,
+        bytes memory data,
+        uint256 value
+    ) internal returns (bytes memory) {
+        return
+            functionCallWithValue(
+                target,
+                data,
+                value,
+                "Address: low-level call with value failed"
+            );
     }
 
-    function functionCallWithValue(address target, bytes memory data, uint256 value, string memory errorMessage) internal returns (bytes memory) {
-        require(address(this).balance >= value, "Address: insufficient balance for call");
+    function functionCallWithValue(
+        address target,
+        bytes memory data,
+        uint256 value,
+        string memory errorMessage
+    ) internal returns (bytes memory) {
+        require(
+            address(this).balance >= value,
+            "Address: insufficient balance for call"
+        );
         require(isContract(target), "Address: call to non-contract");
 
-        (bool success, bytes memory returndata) = target.call{ value: value }(data);
+        (bool success, bytes memory returndata) = target.call{value: value}(
+            data
+        );
         return _verifyCallResult(success, returndata, errorMessage);
     }
 
-    function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {
-        return functionStaticCall(target, data, "Address: low-level static call failed");
+    function functionStaticCall(address target, bytes memory data)
+        internal
+        view
+        returns (bytes memory)
+    {
+        return
+            functionStaticCall(
+                target,
+                data,
+                "Address: low-level static call failed"
+            );
     }
 
-    function functionStaticCall(address target, bytes memory data, string memory errorMessage) internal view returns (bytes memory) {
+    function functionStaticCall(
+        address target,
+        bytes memory data,
+        string memory errorMessage
+    ) internal view returns (bytes memory) {
         require(isContract(target), "Address: static call to non-contract");
 
         (bool success, bytes memory returndata) = target.staticcall(data);
         return _verifyCallResult(success, returndata, errorMessage);
     }
 
-    function functionDelegateCall(address target, bytes memory data) internal returns (bytes memory) {
-        return functionDelegateCall(target, data, "Address: low-level delegate call failed");
+    function functionDelegateCall(address target, bytes memory data)
+        internal
+        returns (bytes memory)
+    {
+        return
+            functionDelegateCall(
+                target,
+                data,
+                "Address: low-level delegate call failed"
+            );
     }
 
-    function functionDelegateCall(address target, bytes memory data, string memory errorMessage) internal returns (bytes memory) {
+    function functionDelegateCall(
+        address target,
+        bytes memory data,
+        string memory errorMessage
+    ) internal returns (bytes memory) {
         require(isContract(target), "Address: delegate call to non-contract");
 
         (bool success, bytes memory returndata) = target.delegatecall(data);
         return _verifyCallResult(success, returndata, errorMessage);
     }
 
-    function _verifyCallResult(bool success, bytes memory returndata, string memory errorMessage) private pure returns(bytes memory) {
+    function _verifyCallResult(
+        bool success,
+        bytes memory returndata,
+        string memory errorMessage
+    ) private pure returns (bytes memory) {
         if (success) {
             return returndata;
         } else {
             if (returndata.length > 0) {
-
                 assembly {
                     let returndata_size := mload(returndata)
                     revert(add(32, returndata), returndata_size)
@@ -83,32 +144,50 @@ library Address {
 }
 
 library SafeMath {
-    
-    function tryAdd(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function tryAdd(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         uint256 c = a + b;
         if (c < a) return (false, 0);
         return (true, c);
     }
 
-    function trySub(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function trySub(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         if (b > a) return (false, 0);
         return (true, a - b);
     }
 
-    function tryMul(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        
+    function tryMul(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         if (a == 0) return (true, 0);
         uint256 c = a * b;
         if (c / a != b) return (false, 0);
         return (true, c);
     }
 
-    function tryDiv(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function tryDiv(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         if (b == 0) return (false, 0);
         return (true, a / b);
     }
 
-    function tryMod(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function tryMod(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         if (b == 0) return (false, 0);
         return (true, a % b);
     }
@@ -141,17 +220,29 @@ library SafeMath {
         return a % b;
     }
 
-    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+    function sub(
+        uint256 a,
+        uint256 b,
+        string memory errorMessage
+    ) internal pure returns (uint256) {
         require(b <= a, errorMessage);
         return a - b;
     }
 
-    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+    function div(
+        uint256 a,
+        uint256 b,
+        string memory errorMessage
+    ) internal pure returns (uint256) {
         require(b > 0, errorMessage);
         return a / b;
     }
 
-    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+    function mod(
+        uint256 a,
+        uint256 b,
+        string memory errorMessage
+    ) internal pure returns (uint256) {
         require(b > 0, errorMessage);
         return a % b;
     }
@@ -194,10 +285,9 @@ library EnumerableSet {
     struct Set {
         // Storage of set values
         bytes32[] _values;
-
         // Position of the value in the `values` array, plus 1 because index 0
         // means a value is not in the set.
-        mapping (bytes32 => uint256) _indexes;
+        mapping(bytes32 => uint256) _indexes;
     }
 
     /**
@@ -228,7 +318,8 @@ library EnumerableSet {
         // We read and store the value's index to prevent multiple reads from the same storage slot
         uint256 valueIndex = set._indexes[value];
 
-        if (valueIndex != 0) { // Equivalent to contains(set, value)
+        if (valueIndex != 0) {
+            // Equivalent to contains(set, value)
             // To delete an element from the _values array in O(1), we swap the element to delete with the last one in
             // the array, and then remove the last element (sometimes called as 'swap and pop').
             // This modifies the order of the array, as noted in {at}.
@@ -261,7 +352,11 @@ library EnumerableSet {
     /**
      * @dev Returns true if the value is in the set. O(1).
      */
-    function _contains(Set storage set, bytes32 value) private view returns (bool) {
+    function _contains(Set storage set, bytes32 value)
+        private
+        view
+        returns (bool)
+    {
         return set._indexes[value] != 0;
     }
 
@@ -272,18 +367,25 @@ library EnumerableSet {
         return set._values.length;
     }
 
-   /**
-    * @dev Returns the value stored at position `index` in the set. O(1).
-    *
-    * Note that there are no guarantees on the ordering of values inside the
-    * array, and it may change when more values are added or removed.
-    *
-    * Requirements:
-    *
-    * - `index` must be strictly less than {length}.
-    */
-    function _at(Set storage set, uint256 index) private view returns (bytes32) {
-        require(set._values.length > index, "EnumerableSet: index out of bounds");
+    /**
+     * @dev Returns the value stored at position `index` in the set. O(1).
+     *
+     * Note that there are no guarantees on the ordering of values inside the
+     * array, and it may change when more values are added or removed.
+     *
+     * Requirements:
+     *
+     * - `index` must be strictly less than {length}.
+     */
+    function _at(Set storage set, uint256 index)
+        private
+        view
+        returns (bytes32)
+    {
+        require(
+            set._values.length > index,
+            "EnumerableSet: index out of bounds"
+        );
         return set._values[index];
     }
 
@@ -299,7 +401,10 @@ library EnumerableSet {
      * Returns true if the value was added to the set, that is if it was not
      * already present.
      */
-    function add(AddressSet storage set, address value) internal returns (bool) {
+    function add(AddressSet storage set, address value)
+        internal
+        returns (bool)
+    {
         return _add(set._inner, bytes32(uint256(uint160(value))));
     }
 
@@ -309,14 +414,21 @@ library EnumerableSet {
      * Returns true if the value was removed from the set, that is if it was
      * present.
      */
-    function remove(AddressSet storage set, address value) internal returns (bool) {
+    function remove(AddressSet storage set, address value)
+        internal
+        returns (bool)
+    {
         return _remove(set._inner, bytes32(uint256(uint160(value))));
     }
 
     /**
      * @dev Returns true if the value is in the set. O(1).
      */
-    function contains(AddressSet storage set, address value) internal view returns (bool) {
+    function contains(AddressSet storage set, address value)
+        internal
+        view
+        returns (bool)
+    {
         return _contains(set._inner, bytes32(uint256(uint160(value))));
     }
 
@@ -327,20 +439,23 @@ library EnumerableSet {
         return _length(set._inner);
     }
 
-   /**
-    * @dev Returns the value stored at position `index` in the set. O(1).
-    *
-    * Note that there are no guarantees on the ordering of values inside the
-    * array, and it may change when more values are added or removed.
-    *
-    * Requirements:
-    *
-    * - `index` must be strictly less than {length}.
-    */
-    function at(AddressSet storage set, uint256 index) internal view returns (address) {
+    /**
+     * @dev Returns the value stored at position `index` in the set. O(1).
+     *
+     * Note that there are no guarantees on the ordering of values inside the
+     * array, and it may change when more values are added or removed.
+     *
+     * Requirements:
+     *
+     * - `index` must be strictly less than {length}.
+     */
+    function at(AddressSet storage set, uint256 index)
+        internal
+        view
+        returns (address)
+    {
         return address(uint160(uint256(_at(set._inner, index))));
     }
-
 
     // UintSet
 
@@ -364,14 +479,21 @@ library EnumerableSet {
      * Returns true if the value was removed from the set, that is if it was
      * present.
      */
-    function remove(UintSet storage set, uint256 value) internal returns (bool) {
+    function remove(UintSet storage set, uint256 value)
+        internal
+        returns (bool)
+    {
         return _remove(set._inner, bytes32(value));
     }
 
     /**
      * @dev Returns true if the value is in the set. O(1).
      */
-    function contains(UintSet storage set, uint256 value) internal view returns (bool) {
+    function contains(UintSet storage set, uint256 value)
+        internal
+        view
+        returns (bool)
+    {
         return _contains(set._inner, bytes32(value));
     }
 
@@ -382,33 +504,54 @@ library EnumerableSet {
         return _length(set._inner);
     }
 
-   /**
-    * @dev Returns the value stored at position `index` in the set. O(1).
-    *
-    * Note that there are no guarantees on the ordering of values inside the
-    * array, and it may change when more values are added or removed.
-    *
-    * Requirements:
-    *
-    * - `index` must be strictly less than {length}.
-    */
-    function at(UintSet storage set, uint256 index) internal view returns (uint256) {
+    /**
+     * @dev Returns the value stored at position `index` in the set. O(1).
+     *
+     * Note that there are no guarantees on the ordering of values inside the
+     * array, and it may change when more values are added or removed.
+     *
+     * Requirements:
+     *
+     * - `index` must be strictly less than {length}.
+     */
+    function at(UintSet storage set, uint256 index)
+        internal
+        view
+        returns (uint256)
+    {
         return uint256(_at(set._inner, index));
     }
 }
 
 interface AggregatorInterface {
-  function latestAnswer() external view returns (int256);
-  function latestTimestamp() external view returns (uint256);
-  function latestRound() external view returns (uint256);
-  function getAnswer(uint256 roundId) external view returns (int256);
-  function getTimestamp(uint256 roundId) external view returns (uint256);
+    function latestAnswer() external view returns (int256);
 
-  event AnswerUpdated(int256 indexed current, uint256 indexed roundId, uint256 updatedAt);
-  event NewRound(uint256 indexed roundId, address indexed startedBy, uint256 startedAt);
+    function latestTimestamp() external view returns (uint256);
+
+    function latestRound() external view returns (uint256);
+
+    function getAnswer(uint256 roundId) external view returns (int256);
+
+    function getTimestamp(uint256 roundId) external view returns (uint256);
+
+    event AnswerUpdated(
+        int256 indexed current,
+        uint256 indexed roundId,
+        uint256 updatedAt
+    );
+    event NewRound(
+        uint256 indexed roundId,
+        address indexed startedBy,
+        uint256 startedAt
+    );
 }
 
-contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpgradeable {
+contract Stake is
+    Initializable,
+    ContextUpgradeable,
+    OwnableUpgradeable,
+    UUPSUpgradeable
+{
     using SafeMath for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -437,63 +580,77 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
 
     event RewardsTransferred(address holder, uint256 amount);
 
-    struct UserData{
-        uint depositedTokens; //Number of tokens deposited by user
-        uint stakingTime; // Unix timestamp when user deposited tokens
-        uint lastClaimedTime; // Last timestamp when user claim tokens
-        uint totalEarnedTokens; // Total tokens earned by user
+    struct UserData {
+        uint256 depositedTokens; //Number of tokens deposited by user
+        uint256 stakingTime; // Unix timestamp when user deposited tokens
+        uint256 lastClaimedTime; // Last timestamp when user claim tokens
+        uint256 totalEarnedTokens; // Total tokens earned by user
     }
 
     // Get user details
     mapping(address => UserData) public userData;
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        override
+        onlyOwner
+    {}
 
-    function initialize(AggregatorInterface _dataFeedAddress, address _depositTokens, address _rewardToken, uint256 _rewardInterval) public initializer(
-    ) {
+    function initialize(
+        AggregatorInterface _dataFeedAddress,
+        address _depositTokens,
+        address _rewardToken,
+        uint256 _rewardInterval
+    ) public initializer {
         dataFeedAddress = _dataFeedAddress;
         depositToken = _depositTokens;
         rewardToken = _rewardToken;
         rewardInterval = _rewardInterval;
         rewardRates = [500, 1000, 1500];
     }
-    
+
     /**
      * @dev Get pending claimable amount till current time
-     */   
+     */
     function getPendingAmount(address _holder) public view returns (uint256) {
         UserData memory _userData = userData[_holder];
-        require(holders.contains(_holder), "Not a valid user");
-        require(_userData.depositedTokens != 0, "Staking amount is 0");
-        
+        if (!holders.contains(_holder)) return 0;
+        if (_userData.depositedTokens == 0) return 0;
+
         uint256 timeDiff = block.timestamp - _userData.lastClaimedTime;
         uint256 stakedAmount = _userData.depositedTokens;
-        uint256 stakedAmountInUSD = stakedAmount.mul(uint256(dataFeedAddress.latestAnswer())).div(1e8);
+        uint256 stakedAmountInUSD = stakedAmount
+            .mul(uint256(dataFeedAddress.latestAnswer()))
+            .div(1e8);
 
         uint256 _rate;
 
-        if(block.timestamp <= _userData.stakingTime.add(30 days)){
+        if (block.timestamp <= _userData.stakingTime.add(30 minutes)) {
             _rate = rewardRates[0];
-        }else if(block.timestamp > _userData.stakingTime.add(30 days) && block.timestamp <= _userData.stakingTime.add(180 days)){
+        } else if (
+            block.timestamp > _userData.stakingTime.add(30 minutes) &&
+            block.timestamp <= _userData.stakingTime.add(180 minutes)
+        ) {
             _rate = rewardRates[1];
-        }else{
+        } else {
             _rate = rewardRates[2];
         }
 
-        if((stakedAmountInUSD) > 100 ether){
+        if ((stakedAmountInUSD) > 100 ether) {
             _rate = _rate.add(200);
-        }else if(stakedAmountInUSD > 500 ether){
+        } else if (stakedAmountInUSD > 500 ether) {
             _rate = _rate.add(500);
-        }else if(stakedAmountInUSD > 1000 ether){
+        } else if (stakedAmountInUSD > 1000 ether) {
             _rate = _rate.add(1000);
         }
 
+        require(rewardInterval != 0, "reward interval should not be 0");
         uint256 pendingDivs = stakedAmount
             .mul(_rate)
             .mul(timeDiff)
             .div(rewardInterval)
-            .div(1e4);    
-            
+            .div(1e4);
+
         return pendingDivs;
     }
 
@@ -501,21 +658,30 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
      * @dev Deposit tokens to the contract
      */
     function deposit(uint256 amountToStake) external {
-        UserData memory _userData = userData[msg.sender];
+        // UserData memory _userData = userData[msg.sender];
         require(amountToStake > 0, "Cannot deposit 0 Tokens");
 
         _updateAccount(msg.sender);
 
-        _userData.depositedTokens = _userData.depositedTokens.add(amountToStake);
+        userData[msg.sender].depositedTokens = userData[msg.sender]
+            .depositedTokens
+            .add(amountToStake);
 
         totalStaked = totalStaked.add(amountToStake);
 
         if (!holders.contains(msg.sender)) {
             holders.add(msg.sender);
-            _userData.stakingTime = block.timestamp;
+            userData[msg.sender].stakingTime = block.timestamp;
         }
 
-        require(IERC20Upgradeable(depositToken).transferFrom(msg.sender, address(this), amountToStake), "Insufficient Token Allowance");
+        require(
+            IERC20Upgradeable(depositToken).transferFrom(
+                msg.sender,
+                address(this),
+                amountToStake
+            ),
+            "Insufficient Token Allowance"
+        );
     }
 
     /**
@@ -524,22 +690,28 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
     function withdraw(uint256 amountToWithdraw) external {
         UserData memory _userData = userData[msg.sender];
         require(
-            userData[msg.sender].depositedTokens >= amountToWithdraw,
+            _userData.depositedTokens >= amountToWithdraw,
             "Invalid amount to withdraw"
         );
 
         _updateAccount(msg.sender);
 
-        _userData.depositedTokens = _userData.depositedTokens.sub(
-            amountToWithdraw
-        );
+        userData[msg.sender].depositedTokens = userData[msg.sender]
+            .depositedTokens
+            .sub(amountToWithdraw);
 
         totalStaked = totalStaked.sub(amountToWithdraw);
 
         if (holders.contains(msg.sender) && _userData.depositedTokens == 0) {
             holders.remove(msg.sender);
         }
-        require(IERC20Upgradeable(depositToken).transfer(msg.sender, amountToWithdraw),"Could not transfer tokens.");
+        require(
+            IERC20Upgradeable(depositToken).transfer(
+                msg.sender,
+                amountToWithdraw
+            ),
+            "Could not transfer tokens."
+        );
     }
 
     /**
@@ -559,7 +731,10 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
     /**
      * @dev Get stakers list in contract
      */
-    function getStakersList(uint256 startIndex, uint256 endIndex) external view returns (
+    function getStakersList(uint256 startIndex, uint256 endIndex)
+        external
+        view
+        returns (
             address[] memory stakers,
             uint256[] memory stakingTimestamps,
             uint256[] memory lastClaimedTimeStamps,
@@ -579,7 +754,8 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
             uint256 listIndex = i.sub(startIndex);
             _stakers[listIndex] = staker;
             _stakingTimestamps[listIndex] = userData[staker].stakingTime;
-            _lastClaimedTimeStamps[listIndex] = userData[staker].lastClaimedTime;
+            _lastClaimedTimeStamps[listIndex] = userData[staker]
+                .lastClaimedTime;
             _stakedTokens[listIndex] = userData[staker].depositedTokens;
         }
 
@@ -590,7 +766,7 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
             _stakedTokens
         );
     }
- 
+
     /**
      * @dev Update user account details
      */
@@ -598,7 +774,6 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
         UserData memory _userData = userData[account];
         uint256 pendingDivs = getPendingAmount(account);
         if (pendingDivs > 0) {
-            
             require(
                 IERC20Upgradeable(rewardToken).transfer(account, pendingDivs),
                 "Could not transfer tokens."
@@ -606,9 +781,9 @@ contract Stake is Initializable, ContextUpgradeable, OwnableUpgradeable, UUPSUpg
             _userData.totalEarnedTokens = _userData.totalEarnedTokens.add(
                 pendingDivs
             );
-            totalClaimedRewards = totalClaimedRewards.add(pendingDivs); 
-            emit RewardsTransferred(account, pendingDivs); 
+            totalClaimedRewards = totalClaimedRewards.add(pendingDivs);
+            emit RewardsTransferred(account, pendingDivs);
         }
-        _userData.lastClaimedTime = block.timestamp;
+        userData[account].lastClaimedTime = block.timestamp;
     }
 }

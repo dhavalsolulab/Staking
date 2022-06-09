@@ -26,7 +26,8 @@ module.exports = {
   networks: {
     'rinkeby': {
       url: process.env.RPC_URL,
-      accounts: [process.env.ACC_PRIVATE_KEY]
+      accounts: [process.env.ACC_PRIVATE_KEY],
+      timeout: 1500000
     }
   },
   solidity: {
@@ -43,7 +44,7 @@ module.exports = {
       runs: 200
     }
   },mocha: {
-    timeout: 4200000,
+    timeout: 210000,
   },
 },
 etherscan: {
