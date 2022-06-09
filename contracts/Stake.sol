@@ -780,7 +780,6 @@ contract Stake is
      * @param account : User address
      */
     function _updateAccount(address account) private {
-        UserData memory _userData = userData[account];
         uint256 pendingDivs = getPendingAmount(account);
         if (pendingDivs > 0) {
             require(
