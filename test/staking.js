@@ -38,10 +38,46 @@ describe("Staking contract deploy", async function () {
         })
     })
 
-    describe("Deposit 200 tokens with approve", async () => {
-        before("Deposit 200 tokens", async () => {
-            const trasnferTx = await daiToken.transfer(factoryProxy.address, "10000000000000000");
-            trasnferTx.wait();
+    // describe("Deposit 200 tokens with approve", async () => {
+    //     before("Deposit 200 tokens", async () => {
+    //         const trasnferTx = await daiToken.transfer(factoryProxy.address, "10000000000000000");
+    //         trasnferTx.wait();
+    //         const approveTx = await daiToken.approve(factoryProxy.address, "100000000000000000000000");
+    //         await approveTx.wait();
+    //         // expect(await daiToken.allowance(owner.address, factoryProxy.address)).to.equal("100000000000000000000000");
+
+    //         const depositTx = await factoryProxy.deposit("200000000000000000000");
+    //         await depositTx.wait();
+    //     })
+    //     it("User's deposited tokens should be 200", async () => {
+    //         const userData = await factoryProxy.userData(owner.address);
+
+    //         expect(userData[0]).to.equal("200000000000000000000");
+    //     })
+    // })
+
+    // describe("Withdraw more tokens than deposited", async () => {
+    //     it("Withdraw 201 tokens should reverted", async () => {
+    //         await expect(factoryProxy.withdraw("201000000000000000000")).to.be.reverted;
+    //     })
+    // })
+
+    // describe("Withdraw 200 tokens", async () => {
+    //     before("withdraw", async () => {
+    //         const withdrawTx = await factoryProxy.withdraw("200000000000000000000");
+    //         withdrawTx.wait();
+    //     })
+
+    //     it("Withdraw 200 tokens and user's deposited tokens should be 0", async () => {
+    //         const userData = await factoryProxy.userData(owner.address);
+
+    //         expect(userData[0]).to.equal("0");
+    //     })
+    // })
+
+    describe("Deposit tokens", async () => {
+
+        before("Deposit 200 tokens and claim", async () => {
             const approveTx = await daiToken.approve(factoryProxy.address, "100000000000000000000000");
             await approveTx.wait();
             // expect(await daiToken.allowance(owner.address, factoryProxy.address)).to.equal("100000000000000000000000");
@@ -49,57 +85,20 @@ describe("Staking contract deploy", async function () {
             const depositTx = await factoryProxy.deposit("200000000000000000000");
             await depositTx.wait();
         })
+        it("User's allowance should be 99800", async () => {
+            const allowance = await daiToken.allowance(owner.address, factoryProxy.address);
+
+            expect(allowance).to.equal("99800000000000000000000");
+        })
         it("User's deposited tokens should be 200", async () => {
             const userData = await factoryProxy.userData(owner.address);
 
             expect(userData[0]).to.equal("200000000000000000000");
         })
-    })
-
-    describe("Withdraw more tokens than deposited", async () => {
-        it("Withdraw 201 tokens should reverted", async () => {
-            await expect(factoryProxy.withdraw("201000000000000000000")).to.be.reverted;
-        })
-    })
-
-    describe("Withdraw 200 tokens", async () => {
-        before("withdraw", async () => {
-            const withdrawTx = await factoryProxy.withdraw("200000000000000000000");
-            withdrawTx.wait();
-        })
-
-        
-        // it("Withdraw 200 tokens and user's deposited tokens should be 0", async () => {
-        //     const userData = await factoryProxy.userData(owner.address);
-
-        //     expect(userData[0]).to.equal("0");
-        // })
-    })
-
-    describe("Deposit tokens", async () => {
-
-        before("Deposit 200 tokens and claim", async () => {
-            // const approveTx = await daiToken.approve(factoryProxy.address, "100000000000000000000000");
-            // await approveTx.wait();
-            // expect(await daiToken.allowance(owner.address, factoryProxy.address)).to.equal("100000000000000000000000");
-
-            const depositTx = await factoryProxy.deposit("200000000000000000000");
-            await depositTx.wait();
-        })
-        it("User's allowance should be 99600", async () => {
-            const allowance = await daiToken.allowance(owner.address, factoryProxy.address);
-
-            expect(allowance).to.equal("99600000000000000000000");
-        })
-        it("User's deposited tokens should be 400", async () => {
-            const userData = await factoryProxy.userData(owner.address);
-
-            expect(userData[0]).to.equal("400000000000000000000");
-        })
-        it("Total staked tokens should be 400", async () => {
+        it("Total staked tokens should be 200", async () => {
             const totalStaked = await factoryProxy.totalStaked();
 
-            expect(totalStaked).to.equal("400000000000000000000");
+            expect(totalStaked).to.equal("200000000000000000000");
         })
         it("Number of holders should be 1", async () => {
             const holders = await factoryProxy.getNumberOfHolders();
